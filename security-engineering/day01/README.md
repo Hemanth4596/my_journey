@@ -7,7 +7,6 @@
 
 # 📸 Screenshots Taken Today
 
-- 📷 [Basic Permissions](screenshots/Basic-Permissions.png)
 - 📷 [Ownership Rules](screenshots/Ownership-Rules.png)
 - 📷 [ACL Implementation](screenshots/ACL-Implementation.png)
 - 📷 [SUID Demonstration](screenshots/SUID-Demonstration.png)
