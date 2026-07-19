@@ -11,7 +11,7 @@
 - ✅ ![Ownership Rules](screenshots/Ownership Rules.png)
 - ✅ ![ACL Implementation](screenshots/ACL Implementation.png)
 - ✅ ![SUID Demonstration](screenshots/SUID Demonstration.png)
-- ✅ ![Capabilities Practice](screenshots/Capabilities Practice.png)
+- ✅ ![Capabilities Practice](screenshots/Capabilities-Practice.png)
 
 ---
 
