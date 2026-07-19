@@ -8,7 +8,6 @@
 # 📸 Screenshots Taken Today
 
 - 📷 [CPU Information](screenshots/Reading-the-CPU-&-Memory-Dashboard.png)
-- 📷 [Memory Information](screenshots/memory-information.png)
 - 📷 [Kernel Version](screenshots/Checking-Kernel-Version-vs-Boot-Secrets.png)
 - 📷 [Boot Parameters](screenshots/Checking-Kernel-Version-vs-Boot-Secrets.png)
 - 📷 [MAC Address](screenshots/Finding-the-Hardware-ID-(MAC)-and-Disk-Driver.png)
