@@ -7,11 +7,11 @@
 
 # 📸 Screenshots Taken Today
 
-- ✅ Basic Permissions
-- ✅ Ownership Rules
-- ✅ ACL Implementation
-- ✅ SUID Demonstration
-- ✅ Capabilities Practice
+- ✅ ![Basic Permissions](screenshots/Basic Permissions.png)
+- ✅ ![Ownership Rules](screenshots/Ownership Rules.png)
+- ✅ ![ACL Implementation](screenshots/ACL Implementation.png)
+- ✅ ![SUID Demonstration](screenshots/SUID Demonstration.png)
+- ✅ ![Capabilities Practice](screenshots/Capabilities Practice.png)
 
 ---
 
