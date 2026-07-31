@@ -8,11 +8,11 @@
 
 # 📸 Screenshots Taken Today
 
-- 📷 [Process Status](screenshots/01-process-status.png)
-- 📷 [Memory Maps](screenshots/02-memory-maps.png)
-- 📷 [Resource Limits](screenshots/03-resource-limits.png)
-- 📷 [tmux Session](screenshots/04-tmux-session.png)
-- 📷 [Vim Macro Replay](screenshots/05-vim-macro.png)
+- 📷 [Process Status](screenshots/1.png)
+- 📷 [Memory Maps](screenshots/2.png)
+- 📷 [Resource Limits](screenshots/3.png)
+- 📷 [tmux Session](screenshots/5.png)
+- 📷 [Vim Macro Replay](screenshots/4.png)
 
 ---
 
