@@ -1,311 +1,260 @@
-# 🔒 Day 4 - SUID, SGID, Sticky Bit & Linux Capabilities
+# 🔐 Day 2 — CSE: Inspect and Compare File Permissions
 
-**📅 Date:** July 29, 2026  
-**🎯 Role:** Cloud Security Engineering  
-**🎯 Goal:** Understand Linux special permission bits (SUID, SGID, Sticky Bit), audit privilege escalation risks, and explore Linux Capabilities as a safer alternative to full root privileges.
+**🎯 Role/Track:** Cloud Security Engineering (CSE)  
+**🎯 Goal:** Understand Linux file permissions and compare modes `600` and `640`.
 
 ---
 
 # 📸 Screenshots Taken Today
 
-- 📷 [SUID Binary Scan](screenshots/1.png)
-- 📷 [SGID Binary Scan](screenshots/2.png)
-- 📷 [Capability Inspection](screenshots/3.png)
-- 📷 [Capability Drop Test](screenshots/4.png)
+**Screenshot status:** Pending — capture the real lab evidence.
+
+- `screenshots/day-002-cse-permission-inspection.png` — Show `chmod 640`, `ls -l`, and `stat` verifying the final permission mode.
+
+**Evidence required:**
+- The permission change applied to `report.txt`.
+- The symbolic permission string `-rw-r-----`.
+- The numeric permission mode `640`.
+- File owner and group information.
 
 ---
 
 # 📖 What I Learned Today
 
-## 1. Special Permission Bits
+## 1. Understanding Linux File Permissions
 
-Linux provides three special permission bits in addition to the standard `rwx` permissions.
+Linux file permissions control who can read, modify, or execute a file. The three permission classes are:
 
-### SUID (Set User ID)
+| Class | Description |
+|---|---|
+| Owner | The user who owns the file |
+| Group | Users associated with the file's group |
+| Others | All other users |
 
-```bash
-find / -perm /4000 -ls 2>/dev/null
+Linux represents basic permissions using these values:
+
+| Permission | Symbol | Numeric Value |
+|---|---|---:|
+| Read | `r` | 4 |
+| Write | `w` | 2 |
+| Execute | `x` | 1 |
+| No permission | `-` | 0 |
+
+## 2. Understanding Permission Mode `640`
+
+Linux combines permission values for each class.
+
+- Owner: `6` = read + write (`4 + 2`)
+- Group: `4` = read only
+- Others: `0` = no permissions
+
+The symbolic permission string for a regular file with mode `640` is:
+
+```text
+-rw-r-----
 ```
 
-When a SUID binary executes, it runs with the permissions of the file owner rather than the user launching it.
+The initial `-` indicates a regular file. The remaining nine characters represent permissions for the owner, group, and others.
 
-Common example:
+## 3. Difference Between `600` and `640`
 
-```
-/usr/bin/passwd
-```
+| Permission Mode | Owner | Group | Others |
+|---|---|---|---|
+| `600` | Read, write | None | None |
+| `640` | Read, write | Read only | None |
 
-This allows ordinary users to update password information that only root can modify.
+Both modes allow the owner to read and modify the file. Mode `640` additionally allows members of the file's group to read it.
+
+Therefore, `600` is more restrictive than `640` because it does not grant group read access.
+
+## 4. Understanding Permission Commands
+
+| Command | Purpose |
+|---|---|
+| `chmod` | Changes file permissions |
+| `ls -l` | Displays permissions and file details |
+| `stat` | Displays file metadata, including permissions and ownership |
+| `pwd` | Displays the current working directory |
+
+The numeric permission reported by `stat` helps verify the actual mode rather than relying only on visual inspection.
+
+## 5. Why File Permissions Matter in Cloud Security
+
+Configuration files and credential-related files may contain sensitive information. Unnecessarily broad permissions can expose information to other local users.
+
+Restricting file permissions helps reduce this risk. However, file permissions alone do not guarantee that credentials are secure.
+
+Directory permissions behave differently from regular-file permissions. Execute permission on a directory generally allows traversal when other required access conditions are satisfied.
 
 ---
 
-### SGID (Set Group ID)
+# 💻 Commands Practiced / Code Used
+
+**Status:** Commands assigned for the lab; execution has not yet been confirmed.
+
+## 1. Create the Lab Directory
 
 ```bash
-find / -perm /2000 -ls 2>/dev/null
+mkdir -p ~/day-002-lab/cse
+cd ~/day-002-lab/cse
 ```
 
-Files execute using the file's group privileges.
+- `mkdir -p` creates the required directory structure.
+- `cd` moves into the lab directory.
+- `~` represents the current user's home directory.
 
-Directories automatically assign newly created files to the directory's group.
+## 2. Create the Test File
 
-Useful for shared project directories.
+```bash
+printf 'Safe permission test\n' > report.txt
+```
+
+This writes test content to `report.txt`. The redirection operator `>` replaces existing contents if the file already exists, so this should be run only in the dedicated lab directory.
+
+## 3. Inspect Initial Permissions
+
+```bash
+pwd
+ls -l report.txt
+stat -c 'mode=%A (%a) owner=%U group=%G' report.txt
+```
+
+- `pwd` verifies the working directory.
+- `ls -l` displays the symbolic permission string and file details.
+- `%A` displays symbolic permissions.
+- `%a` displays numeric permissions.
+- `%U` displays the owner username.
+- `%G` displays the group name.
+
+The initial permission mode depends on the system's defaults and `umask`.
+
+## 4. Apply Permission Mode `640`
+
+```bash
+chmod 640 report.txt
+```
+
+This grants read/write permissions to the owner, read permission to the group, and no ordinary permissions to others.
+
+## 5. Verify the Final Mode
+
+```bash
+ls -l report.txt
+stat -c 'mode=%A (%a) owner=%U group=%G' report.txt
+```
+
+Expected permission information:
+
+```text
+-rw-r-----
+mode=-rw-r----- (640) owner=your_username group=your_group
+```
+
+**Note:** The output above is illustrative, not captured terminal output. The owner and group values depend on the actual environment.
 
 ---
 
-### Sticky Bit
+# 🧪 Hands-On Lab / Verification
 
-```bash
-chmod +t shared_dir
-```
+## Objective
 
-Verified using:
+Create a separate test file, apply permission mode `640`, and compare it with mode `600`.
 
-```bash
-ls -ld shared_dir
-```
+## Environment
 
-Example output:
+- Ubuntu Bash in Windows Subsystem for Linux (WSL).
 
-```
-drwxrwxrwt
-```
+## Actions Performed
 
-With the Sticky Bit enabled:
+**Pending verification:** No terminal execution has been confirmed in this session.
 
-- Users may create files.
-- Users cannot delete files owned by others.
-- Common example:
+Planned actions:
 
-```
-/tmp
-```
+1. Create `~/day-002-lab/cse`.
+2. Create the test file `report.txt`.
+3. Inspect its initial permissions.
+4. Apply permission mode `640`.
+5. Verify the symbolic and numeric permission modes.
+6. Confirm that the current user can still read the file.
 
----
+## Verification Criteria
 
-# 2. Auditing Privileged Files
+| Check | Expected Result | Status |
+|---|---|---|
+| Test file exists | `report.txt` | Pending |
+| Numeric permission mode | `640` | Pending |
+| Symbolic permission string | `-rw-r-----` | Pending |
+| Owner can read the file | Reading succeeds | Pending |
+| Screenshot evidence | Saved in `screenshots/` | Pending |
 
-Searched for SUID binaries:
+## Safety and Cleanup
 
-```bash
-find / -perm /4000 -ls 2>/dev/null
-```
-
-Searched for SGID binaries:
-
-```bash
-find / -perm /2000 -ls 2>/dev/null
-```
-
-Searched for either:
-
-```bash
-find / -perm /6000 -ls 2>/dev/null
-```
-
-These commands are frequently used during security audits and penetration testing.
+- Work only with the dedicated test file.
+- Do not modify permissions on files under `/etc`, `/proc`, `/sys`, or `/dev`.
+- Check the working directory and file ownership before troubleshooting permission errors.
+- Leave the test file in the lab directory unless cleanup is required.
 
 ---
 
-# 3. Linux Capabilities
+# ☁️ Relevant Engineering / Cloud Context
 
-Rather than granting complete root privileges, Linux can grant only the capability required.
+Linux permission management is relevant to cloud virtual machines and Linux-based infrastructure.
 
-Examined file capabilities:
+Cloud engineers may use file permissions to restrict access to application configuration, deployment files, logs, and other local resources.
 
-```bash
-getcap /usr/bin/ping
-```
-
-Observed process capabilities:
-
-```bash
-cat /proc/self/status | grep Cap
-```
-
-Decoded capability masks:
-
-```bash
-capsh --decode=<hex-mask>
-```
-
-This converted hexadecimal capability values into human-readable capability names.
-
----
-
-# 4. Dropping Capabilities
-
-Executed:
-
-```bash
-capsh --drop=cap_net_raw -- -c "ping -c1 localhost"
-```
-
-Removing `CAP_NET_RAW` prevented `ping` from creating raw sockets.
-
-This demonstrated that capabilities can be removed individually without affecting unrelated privileges.
-
----
-
-# 5. Understanding the Capability Pipeline
-
-Linux maintains multiple capability sets for every process:
-
-- Inheritable
-- Permitted
-- Effective
-- Bounding
-- Ambient
-
-Each `exec()` calculates the new capability state according to kernel rules.
-
-The Bounding Set defines the maximum capabilities a process may ever obtain.
-
----
-
-# 📝 Commands Practiced
-
-## Permission Auditing
-
-```bash
-find / -perm /4000 -ls
-
-find / -perm /2000 -ls
-
-find / -perm /6000 -ls
-```
-
----
-
-## Sticky Bit
-
-```bash
-chmod +t directory
-
-ls -ld directory
-```
-
----
-
-## Capability Inspection
-
-```bash
-getcap
-
-capsh --print
-
-capsh --decode=<mask>
-
-cat /proc/self/status | grep Cap
-```
-
----
-
-## Capability Testing
-
-```bash
-capsh --drop=cap_net_raw -- -c "ping -c1 localhost"
-```
-
----
-
-# 🌐 Cloud Security Engineering Relevance
-
-Modern cloud platforms rely heavily on Linux capabilities to reduce attack surface.
-
-Examples include:
-
-- Kubernetes `securityContext.capabilities`
-- Docker capability drops
-- Container runtime hardening
-- Least Privilege enforcement
-- Image security scanning for unexpected SUID binaries
-
-Many security benchmarks recommend removing unnecessary capabilities before deploying workloads.
-
----
-
-# ⚙️ ECE → Linux Bridge
-
-| Linux Concept | Electronics Analogy |
-|---------------|---------------------|
-| SUID | Master Override Switch |
-| SGID | Shared Bus Controller |
-| Sticky Bit | Write-Protect Logic |
-| Capability Register | CPU Status Register |
-| Bounding Set | Hardware Permission Mask |
-| Capability Drop | Clearing Control Register Bits |
-
-Just as processors expose privileged control bits through status registers, Linux exposes privileges through capability bitmasks that the kernel evaluates during program execution.
+For credential-related files, restrictive permissions can reduce exposure to other local users. The appropriate mode depends on the file's purpose and which users or processes need access.
 
 ---
 
 # ❌ Mistakes I Made Today
 
-| Mistake | Why It Happened | How I Fixed It |
-|----------|-----------------|----------------|
-| Initially thought SUID and capabilities served the same purpose | Both elevate privileges | Learned that capabilities provide much finer control. |
-| Forgot to suppress permission errors during `find` | System directories denied access | Redirected errors using `2>/dev/null`. |
-| Expected dropping one capability to break every privileged program | Capabilities are independent | Learned each capability controls specific kernel operations. |
-| Confused Sticky Bit with SGID | Both affect directory behavior | Understood that Sticky Bit protects deletion, while SGID controls group inheritance. |
-
----
+No mistakes have been reported yet.
 
 # 🐛 Errors I Encountered
 
-| Error | Cause | Resolution |
-|--------|-------|-----------|
-| Large number of "Permission denied" messages | Searching the entire filesystem | Used `2>/dev/null` to suppress expected errors. |
-| `ping` failed after dropping `CAP_NET_RAW` | Raw socket capability removed | Confirmed this was the expected security behavior. |
+No errors have been reported yet.
 
 ---
 
 # 💡 Key Takeaways
 
-- SUID grants full owner privileges and should be used sparingly.
-- SGID simplifies collaboration through shared group ownership.
-- Sticky Bit protects shared directories from accidental deletion.
-- Linux Capabilities implement the Principle of Least Privilege.
-- The Bounding Set defines the maximum privileges a process can obtain.
-- Security audits should regularly inspect SUID binaries and assigned capabilities.
+1. Linux permissions use three classes: owner, group, and others.
+2. Read, write, and execute have numeric values `4`, `2`, and `1`.
+3. Mode `600` gives read/write access to the owner only.
+4. Mode `640` additionally gives read access to the group.
+5. `chmod` changes permissions, while `ls -l` and `stat` help verify them.
+6. Verify the actual result instead of assuming a command succeeded.
 
 ---
 
-# 🎯 Skills Learned
+# 🎯 Skills Learned / Practised
 
-- SUID Auditing
-- SGID Auditing
-- Sticky Bit Management
-- Linux Capabilities
-- Capability Inspection
-- Capability Bounding Set
-- Least Privilege
-- Security Hardening
+**Learned**
+- The structure of Linux file permissions.
+- The numeric permission system.
+- The distinction between modes `600` and `640`.
+
+**Practised**
+- Not yet confirmed; terminal execution is pending.
+
+**Implemented**
+- The permission change on `report.txt` has not yet been confirmed.
+
+**Verified**
+- Final permission mode and screenshot evidence are pending.
 
 ---
 
 # 🚀 Next Steps
 
-Continue exploring Linux security by studying:
-
-- Securebits
-- Ambient Capabilities
-- User Namespaces
-- SELinux
-- AppArmor
-- seccomp
-- Container Security Profiles
+1. Execute the lab in Ubuntu Bash in WSL.
+2. Confirm mode `640` using `ls -l` and `stat`.
+3. Verify that the owner can read `report.txt`.
+4. Capture the real terminal screenshot and save it at the specified path.
+5. Update this README with verified results and actual evidence.
 
 ---
 
 # 🙏 Honest Reflection
 
-Today's session helped me understand that Linux privilege management is far more granular than simply being "root" or "not root."
-
-By experimenting with SUID, SGID, Sticky Bit, and Linux Capabilities, I saw how the operating system provides multiple mechanisms to control access at different levels. The most valuable lesson was learning that capabilities allow individual privileges to be granted or removed without giving a process unrestricted administrative access.
-
-I also learned how to audit privileged binaries and inspect capability masks—skills that are directly applicable when reviewing Linux hosts and container images for unnecessary privilege escalation risks.
-
-The biggest takeaway was that effective security comes from minimizing privilege rather than maximizing it.
-
-> **"Good security isn't about giving root access—it is about granting only the capabilities that are genuinely required."** 🔒
+This session focuses on understanding how Linux permissions control access to files and why the difference between `600` and `640` matters. The practical outcome remains unverified until the commands are executed and the results are inspected.
