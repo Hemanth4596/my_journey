@@ -9,7 +9,7 @@
 
 **Screenshot status:** Pending — capture the real lab evidence.
 
-- `screenshots/day002csepermissioninspection.png` — Show `chmod 640`, `ls -l`, and `stat` verifying the final permission mode.
+- `screenshots/new.png` — Show `chmod 640`, `ls -l`, and `stat` verifying the final permission mode.
 
 **Evidence required:**
 - The permission change applied to `report.txt`.
